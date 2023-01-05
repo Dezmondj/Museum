@@ -1,0 +1,93 @@
+info: 05.01.2023 18:26:07.182 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1,744ms) [Parameters=[], CommandType='Text', CommandTimeout='60']
+      CREATE DATABASE [MuseumEF];
+info: 05.01.2023 18:26:07.900 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (716ms) [Parameters=[], CommandType='Text', CommandTimeout='60']
+      IF SERVERPROPERTY('EngineEdition') <> 5
+      BEGIN
+          ALTER DATABASE [MuseumEF] SET READ_COMMITTED_SNAPSHOT ON;
+      END;
+info: 05.01.2023 18:26:07.915 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: 05.01.2023 18:26:08.153 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (110ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Museums] (
+          [Adress] nvarchar(450) NOT NULL,
+          [Name] nvarchar(450) NOT NULL,
+          [Count_of_employees] int NOT NULL,
+          [Count_of_exhibit] int NOT NULL,
+          [Count_of_hall] int NOT NULL,
+          CONSTRAINT [PK_Museums] PRIMARY KEY ([Adress]),
+          CONSTRAINT [AK_Museums_Name] UNIQUE ([Name])
+      );
+info: 05.01.2023 18:26:08.197 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (44ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Halls] (
+          [HallID] int NOT NULL IDENTITY,
+          [Adress_of_museum] nvarchar(450) NOT NULL,
+          [Type_of_hall] nvarchar(max) NOT NULL,
+          [Count_of_exhibit] int NOT NULL,
+          CONSTRAINT [PK_Halls] PRIMARY KEY ([HallID]),
+          CONSTRAINT [FK_Halls_Museums_Adress_of_museum] FOREIGN KEY ([Adress_of_museum]) REFERENCES [Museums] ([Adress]) ON DELETE NO ACTION
+      );
+info: 05.01.2023 18:26:08.231 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (34ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Persons] (
+          [ID] int NOT NULL IDENTITY,
+          [FName] nvarchar(max) NOT NULL,
+          [LName] nvarchar(max) NOT NULL,
+          [Age] int NOT NULL,
+          [Discriminator] nvarchar(max) NOT NULL,
+          [Status] nvarchar(max) NULL,
+          [Mobile_number] nvarchar(max) NULL,
+          [Adress_of_museum] nvarchar(450) NULL,
+          [Position] nvarchar(max) NULL DEFAULT N'Staff',
+          [Salary] int NULL,
+          CONSTRAINT [PK_Persons] PRIMARY KEY ([ID]),
+          CONSTRAINT [CH_Salary] CHECK (Salary > 14999),
+          CONSTRAINT [FK_Persons_Museums_Adress_of_museum] FOREIGN KEY ([Adress_of_museum]) REFERENCES [Museums] ([Adress]) ON DELETE NO ACTION
+      );
+info: 05.01.2023 18:26:08.232 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Exhibits] (
+          [ExhibitID] int NOT NULL IDENTITY,
+          [HallID] int NOT NULL,
+          [Name] nvarchar(max) NOT NULL,
+          [Cost] decimal(18,2) NOT NULL,
+          [Storage_conditions] nvarchar(max) NOT NULL,
+          CONSTRAINT [PK_Exhibits] PRIMARY KEY ([ExhibitID]),
+          CONSTRAINT [FK_Exhibits_Halls_HallID] FOREIGN KEY ([HallID]) REFERENCES [Halls] ([HallID]) ON DELETE NO ACTION
+      );
+info: 05.01.2023 18:26:08.234 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Tickects] (
+          [TicketID] int NOT NULL IDENTITY,
+          [ClientID] int NOT NULL,
+          [Adress_of_museum] nvarchar(450) NOT NULL,
+          [WorkerID] int NOT NULL,
+          [Date] datetime2 NOT NULL,
+          [Cost] decimal(18,2) NOT NULL,
+          CONSTRAINT [PK_Tickects] PRIMARY KEY ([TicketID]),
+          CONSTRAINT [FK_Tickects_Museums_Adress_of_museum] FOREIGN KEY ([Adress_of_museum]) REFERENCES [Museums] ([Adress]) ON DELETE NO ACTION,
+          CONSTRAINT [FK_Tickects_Persons_ClientID] FOREIGN KEY ([ClientID]) REFERENCES [Persons] ([ID]) ON DELETE NO ACTION,
+          CONSTRAINT [FK_Tickects_Persons_WorkerID] FOREIGN KEY ([WorkerID]) REFERENCES [Persons] ([ID]) ON DELETE NO ACTION
+      );
+info: 05.01.2023 18:26:08.286 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (51ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Exhibits_HallID] ON [Exhibits] ([HallID]);
+info: 05.01.2023 18:26:08.286 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Halls_Adress_of_museum] ON [Halls] ([Adress_of_museum]);
+info: 05.01.2023 18:26:08.287 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Persons_Adress_of_museum] ON [Persons] ([Adress_of_museum]);
+info: 05.01.2023 18:26:08.288 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Tickects_Adress_of_museum] ON [Tickects] ([Adress_of_museum]);
+info: 05.01.2023 18:26:08.288 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Tickects_ClientID] ON [Tickects] ([ClientID]);
+info: 05.01.2023 18:26:08.289 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Tickects_WorkerID] ON [Tickects] ([WorkerID]);
